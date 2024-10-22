@@ -29,7 +29,9 @@ public class Main {
            List<OperationIn> operationInList =  mapper.readValue(jsonInput.toString(),
                             new TypeReference<List<OperationIn>>(){});
 
-           calculatorOperation.calcTax(operationInList).forEach(System.out::println);
+           calculatorOperation.calcTax(operationInList).forEach(operationOut -> {
+               System.out.println(operationOut.tax.toString());
+           });
 
 
 

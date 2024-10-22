@@ -6,101 +6,106 @@ import order.dto.OperationOut;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.Math.round;
+
 public class CalculatorOperation {
 
+    private static final double TAX_PERCENTAGE = 0.20;
+    private static final double OPERATION_THRESHOLD = 20000.00;
+    double averageCost = 0.0;
+    int totalQuantity = 0;
+    double cumulativeLoss = 0.0;
+    List<OperationOut> operationOutList = new ArrayList<>();
+
     public List<OperationOut> calcTax(List<OperationIn> operationInList){
-        List<OperationOut> operationOutList = new ArrayList<>();
-        List<Boolean> impostoOperationList  = new ArrayList<Boolean>();
-        Double[]  calcPrejuizo = {0.0};
-        List<Double> taxList = new ArrayList<>();
-        Double medPonderada  = calcMediaPonderada(operationInList);
-
-        operationInList.stream().forEach(operation-> {
-            if (operation.getOperation().equalsIgnoreCase("sell")) {
-                impostoOperationList.add(calcOperation(operation.getQuantity(),operation.getUnitCost()));
-
+        for (OperationIn op : operationInList) {
+            if (op.getOperation().equalsIgnoreCase("buy")) {
+                handleBuyOperation(op);
+            } else if (op.getOperation().equalsIgnoreCase("sell")) {
+                handleSellOperation(op);
+            } else {
+                handleUnknownOperation();
             }
-        });
-
-        operationInList.stream().forEach(operation-> {
-            if(operation.getOperation().equalsIgnoreCase("sell"))
-                if(calcOperation(operation.getQuantity(),operation.getUnitCost()))
-                    if(calcPrejuizo(operation.getUnitCost(),medPonderada,operation.getQuantity()) < 0 )
-                        taxList.add(0.0);
-                    else
-                        if(operation.getUnitCost() > medPonderada)
-                            taxList.add((((operation.getUnitCost() * operation.getQuantity()) - (operation.getQuantity() * medPonderada))
-                                    - calcPrejuizo(operation.getUnitCost(),medPonderada,operation.getQuantity())) *0.20);
-
-                        else
-                            taxList.add((((operation.getUnitCost() * operation.getQuantity()) - (operation.getQuantity() * medPonderada))) *0.20);
-                else
-                    taxList.add(0.0);
-            else
-                taxList.add(0.0);
-        });
-
-        taxList.stream().forEach(tax -> {
-            OperationOut operationOut = new OperationOut();
-            operationOut.setTax(tax);
-            operationOutList.add(operationOut);
-        });
-
+        }
         return operationOutList;
-    }
-
-    private boolean calcOperation(int qtde, Double costUnit){
-
-        return  (costUnit * qtde) >= 20000.00;
 
     }
 
-//    private Double calcPrecoMedioPonderado(List<OperationIn> operationInList){
-//        int[] qtdeStockBuy  = {0};
-//        int[] qtdeStockSell = {0};
-//        Double[] costBuy    = {0.0};
-//        Double medPonderada = calcMediaPonderada(operationInList);
-//
-//        operationInList.stream().forEach(operation->{
-//            if(operation.getOperation().equalsIgnoreCase("buy")) {
-//                qtdeStockBuy[0] += operation.getQuantity();
-//                costBuy[0]      += operation.getUnitCost();
-//            }
-//            else{
-//                qtdeStockSell[0] += operation.getQuantity();
-//            }
-//        });
-//
-//
-//        int qtdeStocks = qtdeStockBuy[0] - qtdeStockSell[0];
-//       // ((quantidade-de-ações-atual * média-ponderada-atual) + (quantidade-de-ações-compradas * valor-de-compra)) / (quantidade-de-ações-atual + quantidade-de-ações-compradas)
-//        return ((qtdeStocks * medPonderada) + (qtdeStockBuy[0] * costBuy[0]))/(qtdeStocks+qtdeStockBuy[0]);
-//    }
-
-    private Double calcPrejuizo(Double precoUnidade, Double costAverage,int qtde){
-        return (precoUnidade - costAverage) * qtde;
-
+    private void handleBuyOperation(OperationIn op) {
+        // Atualizar média ponderada
+        averageCost = calcAverageCost(averageCost, totalQuantity, op.getUnitCost(), op.getQuantity());
+        // Comprar não gera imposto
+        operationOutList.add(new OperationOut(0.00));
     }
 
-    private Double calcMediaPonderada(List<OperationIn> operationInList){
+    private void handleSellOperation(OperationIn op) {
+        double sellTotal = op.getUnitCost() * op.getQuantity();
+        double profit = calculateProfit(op);
+        totalQuantity -= op.getQuantity();
+        double tax = calculateTax(sellTotal, profit);
+        operationOutList.add(new OperationOut(tax));
+    }
 
-       List<Integer> stockBuy = new ArrayList<>();
-       List<Double> qtdeValue = new ArrayList<>();
-       int[] qtde = {0};
-       Double[] qtdeCost = {0.0};
-        operationInList.stream().forEach(operation->{
-            if(operation.getOperation().equalsIgnoreCase("buy")) {
-                qtdeValue.add(operation.getQuantity() * operation.getUnitCost());
-                qtde[0] += operation.getQuantity();
+    private double calculateProfit(OperationIn op) {
+        double sellPrice = op.getUnitCost();
+        double costPrice = averageCost * op.getQuantity();
+        return (sellPrice - averageCost) * op.getQuantity();
+    }
+
+    private double calculateTax(double sellTotal, double profit) {
+        double tax = 0.00;
+        if (sellTotal > OPERATION_THRESHOLD) {
+            tax = handleTaxableProfit(profit);
+        } else if (profit < 0) {
+            cumulativeLoss += Math.abs(profit);
+        }
+        tax = handleCumulativeLoss(profit, sellTotal, tax);
+        return tax;
+    }
+
+    private double handleTaxableProfit(double profit) {
+        double taxableProfit = profit;
+        if (profit > 0) {
+            if (cumulativeLoss > 0) {
+                if (cumulativeLoss >= taxableProfit) {
+                    taxableProfit = 0.00;
+                    cumulativeLoss -= profit;
+                } else {
+                    taxableProfit -= cumulativeLoss;
+                    cumulativeLoss = 0.00;
+                }
             }
-        });
+            return round(taxableProfit * TAX_PERCENTAGE);
+        } else {
+            cumulativeLoss += Math.abs(profit);
+            return 0.00;
+        }
+    }
 
-        qtdeValue.forEach(custo -> {
-            qtdeCost[0] += custo;
-        });
+    private double handleCumulativeLoss(double profit, double sellTotal, double tax) {
+        if (profit > 0 && cumulativeLoss > 0) {
+            if (cumulativeLoss >= profit) {
+                tax = 0.00;
+            } else {
+                double remainingProfit = profit - cumulativeLoss;
+                cumulativeLoss = 0.00;
+                if (sellTotal > OPERATION_THRESHOLD) {
+                    tax = round(remainingProfit * TAX_PERCENTAGE);
+                }
+            }
+        }
+        return tax;
+    }
 
-        return qtdeCost[0]/qtde[0];
+    private void handleUnknownOperation() {
+        // Operação desconhecida, consideramos imposto 0
+        operationOutList.add(new OperationOut(0.00));
+    }
 
+    private double calcAverageCost(double averageCost,int totalQuantity, double costUnit, int quantity){
+        double totalCost = averageCost * totalQuantity + costUnit * quantity;
+        totalQuantity += quantity;
+        return   round(totalCost / totalQuantity);
     }
 
 }
