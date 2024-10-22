@@ -21,7 +21,7 @@ public class OperationOut {
     public String toString() {
         return "{" +
                 "\"tax\":" + String.format("%.2f",tax) +
-                '}';
+                "}";
     }
 
 }

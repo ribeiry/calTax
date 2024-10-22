@@ -12,6 +12,10 @@ public class CalculatorOperation {
 
     private static final double TAX_PERCENTAGE = 0.20;
     private static final double OPERATION_THRESHOLD = 20000.00;
+    private static final double RESET_VARIABLES     = 0.00;
+    private static final String OPERATION_BUY       = "buy";
+    private static final String OPERATION_SELL       = "sell";
+
     double averageCost = 0.0;
     int totalQuantity = 0;
     double cumulativeLoss = 0.0;
@@ -19,9 +23,9 @@ public class CalculatorOperation {
 
     public List<OperationOut> calcTax(List<OperationIn> operationInList){
         for (OperationIn op : operationInList) {
-            if (op.getOperation().equalsIgnoreCase("buy")) {
+            if (op.getOperation().equalsIgnoreCase(OPERATION_BUY)) {
                 handleBuyOperation(op);
-            } else if (op.getOperation().equalsIgnoreCase("sell")) {
+            } else if (op.getOperation().equalsIgnoreCase(OPERATION_SELL)) {
                 handleSellOperation(op);
             } else {
                 handleUnknownOperation();
@@ -38,7 +42,7 @@ public class CalculatorOperation {
         averageCost = totalCost / totalQuantity;
         averageCost =  round(averageCost);
         // Comprar não gera imposto
-        operationOutList.add(new OperationOut(0.00));
+        operationOutList.add(new OperationOut(RESET_VARIABLES));
     }
 
     private void handleSellOperation(OperationIn op) {
@@ -56,7 +60,7 @@ public class CalculatorOperation {
     }
 
     private double calculateTax(double sellTotal, double profit) {
-        double tax = 0.00;
+        double tax = RESET_VARIABLES;
         if (sellTotal > OPERATION_THRESHOLD) {
             tax = handleTaxableProfit(profit);
         } else if (profit < 0) {
@@ -71,27 +75,27 @@ public class CalculatorOperation {
         if (profit > 0) {
             if (cumulativeLoss > 0) {
                 if (cumulativeLoss >= taxableProfit) {
-                    taxableProfit = 0.00;
+                    taxableProfit = RESET_VARIABLES;
                     cumulativeLoss -= profit;
                 } else {
                     taxableProfit -= cumulativeLoss;
-                    cumulativeLoss = 0.00;
+                    cumulativeLoss = RESET_VARIABLES;
                 }
             }
             return round(taxableProfit * TAX_PERCENTAGE);
         } else {
             cumulativeLoss += Math.abs(profit);
-            return 0.00;
+            return RESET_VARIABLES;
         }
     }
 
     private double handleCumulativeLoss(double profit, double sellTotal, double tax) {
         if (profit > 0 && cumulativeLoss > 0) {
             if (cumulativeLoss >= profit) {
-                tax = 0.00;
+                tax = RESET_VARIABLES;
             } else {
                 double remainingProfit = profit - cumulativeLoss;
-                cumulativeLoss = 0.00;
+                cumulativeLoss = RESET_VARIABLES;
                 if (sellTotal > OPERATION_THRESHOLD) {
                     tax = round(remainingProfit * TAX_PERCENTAGE);
                 }
@@ -102,7 +106,7 @@ public class CalculatorOperation {
 
     private void handleUnknownOperation() {
         // Operação desconhecida, consideramos imposto 0
-        operationOutList.add(new OperationOut(0.00));
+        operationOutList.add(new OperationOut(RESET_VARIABLES));
     }
 
 
