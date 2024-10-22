@@ -33,7 +33,10 @@ public class CalculatorOperation {
 
     private void handleBuyOperation(OperationIn op) {
         // Atualizar média ponderada
-        averageCost = calcAverageCost(averageCost, totalQuantity, op.getUnitCost(), op.getQuantity());
+        double totalCost = averageCost * totalQuantity + op.getUnitCost() * op.getQuantity();
+        totalQuantity += op.getQuantity();
+        averageCost = totalCost / totalQuantity;
+        averageCost =  round(averageCost);
         // Comprar não gera imposto
         operationOutList.add(new OperationOut(0.00));
     }
@@ -102,10 +105,5 @@ public class CalculatorOperation {
         operationOutList.add(new OperationOut(0.00));
     }
 
-    private double calcAverageCost(double averageCost,int totalQuantity, double costUnit, int quantity){
-        double totalCost = averageCost * totalQuantity + costUnit * quantity;
-        totalQuantity += quantity;
-        return   round(totalCost / totalQuantity);
-    }
 
 }

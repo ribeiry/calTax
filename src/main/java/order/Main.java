@@ -32,9 +32,6 @@ public class Main {
            calculatorOperation.calcTax(operationInList).forEach(operationOut -> {
                System.out.println(operationOut.tax.toString());
            });
-
-
-
        }
        catch (IOException e) {
            throw new RuntimeException(e);
