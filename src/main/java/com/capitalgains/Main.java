@@ -3,7 +3,7 @@ package com.capitalgains;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.capitalgains.dto.OperationIn;
 import com.capitalgains.dto.OperationOut;
-import com.capitalgains.exception.NegativeValueException;
+import com.capitalgains.exception.NegativeValueOrNullException;
 
 import java.io.IOException;
 import java.util.List;
@@ -19,7 +19,7 @@ public class Main {
             printResults(operationOutList);
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } catch (NegativeValueException e) {
+        } catch (NegativeValueOrNullException e) {
             throw new RuntimeException(e);
         }
     }

@@ -11,7 +11,15 @@ Este projeto implementa um programa de linha de comando (CLI) para calcular o im
 - **Processamento de JSON:** Jackson
 - **Testes:** JUnit 5
 
-A lógica de cálculo de impostos está isolada na classe `CalculatorOperationIn` para facilitar a manutenção e os testes. As operações e os resultados dos impostos são representados por classes modelo (`OperationIn` e `OperationOut`).
+As operações e os resultados dos impostos são representados por classes modelo (`OperationIn`,`OperationOut` e `OperationCosts`).
+A classe `CalculatorOperation` na service chama as strategies que sāo as seguintes classes:
+- `BuyOperationStrategy` classe responsavel pela compra e atualizar o preço médio;
+- `SellOperation` calcula todos os calculos de prejuizo e abatimento deles para o calculo da taxa;
+- `UnknowOperationStrategy` quando nāo é reconhecida uma operaçāo ele entra na como unknow e é retornado como 0.
+
+Já no pacote **exception** temos a `NegativeValueException` para que seja lançada quando for identificados numeros negativos ou nulos.
+Outro pacote importante é o **utils** que contém a classe `Validation` que efetua validações numeros nulos ou negativos e temos também a 
+classe `UtilIOHandler` que é responsavel por efetuar a leitura do console.
 
 ## Justificativa para Uso de Bibliotecas
 
@@ -74,15 +82,6 @@ mvn test
 
 Os resultados dos testes serão exibidos no console, indicando quais testes passaram ou falharam.
 
-Notas Adicionais
-
-	•	Tratamento de Erros: A aplicação assume que a entrada JSON está corretamente formatada conforme especificado. Entradas malformadas podem resultar em erros de processamento.
-	•	Extensibilidade: A estrutura do projeto permite fácil extensão para adicionar novas funcionalidades ou ajustar a lógica de cálculo conforme necessário.
-	•	Desempenho: O cálculo é realizado em memória, o que é adequado para o escopo deste desafio. Para volumes maiores de dados, considerações adicionais de desempenho podem ser necessárias.
-
-Contato
-
-Para dúvidas ou sugestões, por favor, entre em contato com o responsável pelo projeto.
 
 ## 7. Executando a Aplicação
 

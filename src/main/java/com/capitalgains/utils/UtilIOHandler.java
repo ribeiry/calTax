@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.capitalgains.dto.OperationIn;
 import com.capitalgains.dto.OperationOut;
-import com.capitalgains.exception.NegativeValueException;
+import com.capitalgains.exception.NegativeValueOrNullException;
 import com.capitalgains.services.CalculatorOperation;
 
 import java.io.BufferedReader;
@@ -18,7 +18,7 @@ import static com.capitalgains.utils.Validation.validateOperationsNegativeAndNul
 
 public class UtilIOHandler {
 
-    public static List<OperationIn> readInput() throws IOException, NegativeValueException {
+    public static List<OperationIn> readInput() throws IOException, NegativeValueOrNullException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         StringBuilder jsonInput = new StringBuilder();
         List<String> lines = new ArrayList<>();

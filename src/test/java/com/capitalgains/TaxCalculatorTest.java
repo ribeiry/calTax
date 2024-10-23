@@ -2,7 +2,7 @@ package com.capitalgains;
 
 import com.capitalgains.dto.OperationIn;
 import com.capitalgains.dto.OperationOut;
-import com.capitalgains.exception.NegativeValueException;
+import com.capitalgains.exception.NegativeValueOrNullException;
 import com.capitalgains.services.CalculatorOperation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -173,7 +173,7 @@ public class TaxCalculatorTest {
         operations.add(createOperation("buy", BigDecimal.valueOf(20.00), 10000));
         operations.add(createOperation("sell", BigDecimal.valueOf(50.00), 10000));
 
-        NegativeValueException exception = assertThrows(NegativeValueException.class, ()->
+        NegativeValueOrNullException exception = assertThrows(NegativeValueOrNullException.class, ()->
                 validateOperationsNegativeAndNulls(operations));
 
         assertTrue(exception.getMessage().contains("Unit cost cannot be negative or null"));
