@@ -18,9 +18,9 @@ public class Main {
             List<OperationOut> operationOutList = calculateOperations(operations);
             printResults(operationOutList);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.out.println("Error ao ler o input:" + e.getMessage());
         } catch (NegativeValueOrNullException e) {
-            throw new RuntimeException(e);
+            System.out.println(e.getMessage());
         }
     }
 }

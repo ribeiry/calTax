@@ -179,6 +179,20 @@ public class TaxCalculatorTest {
         assertTrue(exception.getMessage().contains("Unit cost cannot be negative or null"));
     }
 
+    @Test
+    public void testCase10() {
+        List<OperationIn> operations = new ArrayList<>();
+        operations.add(createOperation("buy", BigDecimal.valueOf(10.00), 10000));
+        operations.add(createOperation("sell", null, 10000));
+        operations.add(createOperation("buy", BigDecimal.valueOf(20.00), 10000));
+        operations.add(createOperation("sell", BigDecimal.valueOf(50.00), 10000));
+
+        NegativeValueOrNullException exception = assertThrows(NegativeValueOrNullException.class, ()->
+                validateOperationsNegativeAndNulls(operations));
+
+        assertTrue(exception.getMessage().contains("Unit cost cannot be negative or null"));
+    }
+
 
     private OperationIn createOperation(String type, BigDecimal unitCost, int quantity) {
         OperationIn op = new OperationIn();
