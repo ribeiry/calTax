@@ -1,4 +1,4 @@
-package order.dto;
+package com.capitalgains.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

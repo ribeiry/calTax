@@ -1,9 +1,9 @@
-package order.test;
+package com.capitalgains;
 
-import order.dto.OperationIn;
-import order.dto.OperationOut;
-import order.exception.NegativeValueException;
-import order.services.CalculatorOperation;
+import com.capitalgains.dto.OperationIn;
+import com.capitalgains.dto.OperationOut;
+import com.capitalgains.exception.NegativeValueException;
+import com.capitalgains.services.CalculatorOperation;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +13,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
-import static order.utils.Validation.validateOperationsNegativeAndNulls;
+import static com.capitalgains.utils.Validation.validateOperationsNegativeAndNulls;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

@@ -1,12 +1,12 @@
-package order.utils;
+package com.capitalgains.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import order.dto.OperationIn;
-import order.dto.OperationOut;
-import order.exception.NegativeValueException;
-import order.services.CalculatorOperation;
+import com.capitalgains.dto.OperationIn;
+import com.capitalgains.dto.OperationOut;
+import com.capitalgains.exception.NegativeValueException;
+import com.capitalgains.services.CalculatorOperation;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,7 +14,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import static order.utils.Validation.validateOperationsNegativeAndNulls;
+import static com.capitalgains.utils.Validation.validateOperationsNegativeAndNulls;
 
 public class UtilIOHandler {
 

@@ -1,4 +1,4 @@
-package order.exception;
+package com.capitalgains.exception;
 
 public class NegativeValueException extends Throwable {
     public NegativeValueException(String errorMessage) {
