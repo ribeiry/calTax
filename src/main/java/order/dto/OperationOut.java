@@ -4,17 +4,17 @@ import java.math.BigDecimal;
 
 public class OperationOut {
 
-    public Double tax;
+    public BigDecimal tax;
 
-    public OperationOut(Double tax) {
+    public OperationOut(BigDecimal tax) {
         this.tax = tax;
     }
 
-    public Double getTax() {
+    public BigDecimal getTax() {
         return tax;
     }
 
-    public void setTax(Double tax) {
+    public void setTax(BigDecimal tax) {
         this.tax = tax;
     }
     @Override

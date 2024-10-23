@@ -2,12 +2,14 @@ package order.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.math.BigDecimal;
+
 public class OperationIn {
 
     @JsonProperty("operation")
     private String operation;
     @JsonProperty("unit-cost")
-    private Double unitCost;
+    private BigDecimal unitCost;
     @JsonProperty("quantity")
     private Integer quantity;
 
@@ -27,11 +29,11 @@ public class OperationIn {
         this.operation = operation;
     }
 
-    public Double getUnitCost() {
+    public BigDecimal getUnitCost() {
         return unitCost;
     }
 
-    public void setUnitCost(Double unitCost) {
+    public void setUnitCost(BigDecimal unitCost) {
         this.unitCost = unitCost;
     }
 

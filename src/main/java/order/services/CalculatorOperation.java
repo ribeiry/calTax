@@ -3,6 +3,8 @@ package order.services;
 import order.dto.OperationIn;
 import order.dto.OperationOut;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,22 +12,22 @@ import static java.lang.Math.round;
 
 public class CalculatorOperation {
 
-    private static final double TAX_PERCENTAGE = 0.20;
-    private static final double OPERATION_THRESHOLD = 20000.00;
-    private static final double RESET_VARIABLES     = 0.00;
+    private static final BigDecimal TAX_PERCENTAGE = BigDecimal.valueOf(0.20);
+    private static final BigDecimal OPERATION_THRESHOLD = BigDecimal.valueOf(20000.00);
+    private static final BigDecimal RESET_VARIABLES     = BigDecimal.valueOf(0.00);
     private static final String OPERATION_BUY       = "buy";
     private static final String OPERATION_SELL       = "sell";
 
-    double averageCost = 0.0;
+    BigDecimal averageCost = BigDecimal.valueOf(0.0);
     int totalQuantity = 0;
-    double cumulativeLoss = 0.0;
+    BigDecimal cumulativeLoss = BigDecimal.valueOf(0.0);
     List<OperationOut> operationOutList = new ArrayList<>();
 
     public List<OperationOut> calcTax(List<OperationIn> operationInList){
         for (OperationIn op : operationInList) {
-            if (op.getOperation().equalsIgnoreCase(OPERATION_BUY)) {
+            if (OPERATION_BUY.equalsIgnoreCase(op.getOperation())) {
                 handleBuyOperation(op);
-            } else if (op.getOperation().equalsIgnoreCase(OPERATION_SELL)) {
+            } else if (OPERATION_SELL.equalsIgnoreCase(op.getOperation())) {
                 handleSellOperation(op);
             } else {
                 handleUnknownOperation();
@@ -37,67 +39,67 @@ public class CalculatorOperation {
 
     private void handleBuyOperation(OperationIn op) {
         // Atualizar média ponderada
-        double totalCost = averageCost * totalQuantity + op.getUnitCost() * op.getQuantity();
+        BigDecimal totalCost =  averageCost.multiply( BigDecimal.valueOf( totalQuantity)).add(op.getUnitCost().multiply( BigDecimal.valueOf(op.getQuantity())));
         totalQuantity += op.getQuantity();
-        averageCost = totalCost / totalQuantity;
-        averageCost =  round(averageCost);
+        averageCost = totalCost.divide(BigDecimal.valueOf(totalQuantity));
+        averageCost = averageCost.setScale(2, RoundingMode.HALF_UP);
         // Comprar não gera imposto
         operationOutList.add(new OperationOut(RESET_VARIABLES));
     }
 
     private void handleSellOperation(OperationIn op) {
-        double sellTotal = op.getUnitCost() * op.getQuantity();
-        double profit = calculateProfit(op);
+        BigDecimal sellTotal = op.getUnitCost().multiply( BigDecimal.valueOf( op.getQuantity()));
+        BigDecimal profit = calculateProfit(op);
         totalQuantity -= op.getQuantity();
-        double tax = calculateTax(sellTotal, profit);
+        BigDecimal tax = calculateTax(sellTotal, profit);
         operationOutList.add(new OperationOut(tax));
     }
 
-    private double calculateProfit(OperationIn op) {
-        double sellPrice = op.getUnitCost();
-        double costPrice = averageCost * op.getQuantity();
-        return (sellPrice - averageCost) * op.getQuantity();
+    private BigDecimal calculateProfit(OperationIn op) {
+        BigDecimal sellPrice = op.getUnitCost();
+        BigDecimal costPrice = averageCost.multiply( BigDecimal.valueOf(op.getQuantity()));
+        return sellPrice.subtract(averageCost).multiply(BigDecimal.valueOf(op.getQuantity()));
     }
 
-    private double calculateTax(double sellTotal, double profit) {
-        double tax = RESET_VARIABLES;
-        if (sellTotal > OPERATION_THRESHOLD) {
+    private BigDecimal calculateTax(BigDecimal sellTotal, BigDecimal profit) {
+        BigDecimal tax = RESET_VARIABLES;
+        if (sellTotal.compareTo(OPERATION_THRESHOLD) == 1) {
             tax = handleTaxableProfit(profit);
-        } else if (profit < 0) {
-            cumulativeLoss += Math.abs(profit);
+        } else if (profit.compareTo(BigDecimal.valueOf(0)) == -1) {
+            cumulativeLoss = profit.abs().add(cumulativeLoss);
         }
         tax = handleCumulativeLoss(profit, sellTotal, tax);
         return tax;
     }
 
-    private double handleTaxableProfit(double profit) {
-        double taxableProfit = profit;
-        if (profit > 0) {
-            if (cumulativeLoss > 0) {
-                if (cumulativeLoss >= taxableProfit) {
+    private BigDecimal handleTaxableProfit(BigDecimal profit) {
+        BigDecimal taxableProfit = profit;
+        if (profit.compareTo(BigDecimal.valueOf(0)) == 1) {
+            if (cumulativeLoss.compareTo(BigDecimal.valueOf(0)) == 1) {
+                if (cumulativeLoss.compareTo(taxableProfit) >= 0) {
                     taxableProfit = RESET_VARIABLES;
-                    cumulativeLoss -= profit;
+                    cumulativeLoss =  cumulativeLoss.subtract(profit);
                 } else {
-                    taxableProfit -= cumulativeLoss;
+                    taxableProfit = taxableProfit.subtract(cumulativeLoss);
                     cumulativeLoss = RESET_VARIABLES;
                 }
             }
-            return round(taxableProfit * TAX_PERCENTAGE);
+            return taxableProfit.multiply(TAX_PERCENTAGE).setScale(2,RoundingMode.HALF_UP);
         } else {
-            cumulativeLoss += Math.abs(profit);
+            cumulativeLoss =  cumulativeLoss.subtract(profit).abs();
             return RESET_VARIABLES;
         }
     }
 
-    private double handleCumulativeLoss(double profit, double sellTotal, double tax) {
-        if (profit > 0 && cumulativeLoss > 0) {
-            if (cumulativeLoss >= profit) {
+    private BigDecimal handleCumulativeLoss(BigDecimal profit, BigDecimal sellTotal, BigDecimal tax) {
+        if (profit.compareTo(BigDecimal.valueOf(0)) == 1 && cumulativeLoss.compareTo(BigDecimal.valueOf(0)) == 1  ) {
+            if (cumulativeLoss.compareTo( profit) >= 0) {
                 tax = RESET_VARIABLES;
             } else {
-                double remainingProfit = profit - cumulativeLoss;
+                BigDecimal remainingProfit = profit.subtract(cumulativeLoss);
                 cumulativeLoss = RESET_VARIABLES;
-                if (sellTotal > OPERATION_THRESHOLD) {
-                    tax = round(remainingProfit * TAX_PERCENTAGE);
+                if (sellTotal.compareTo(OPERATION_THRESHOLD) == 1) {
+                    tax = remainingProfit.multiply(TAX_PERCENTAGE).setScale(2, RoundingMode.HALF_UP);
                 }
             }
         }
